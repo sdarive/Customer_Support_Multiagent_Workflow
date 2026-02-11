@@ -12,22 +12,8 @@ The system uses a collaborative multi-agent architecture to process incoming sup
 
 ### Architecture
 
-```text
-      [ Support Ticket ]
-              |
-              V
-    +-------------------+
-    |   Coordinator     | <---- [ BigQuery Telemetry ]
-    +-------------------+
-      /        |        \
-     V         V         V
-+----------+ +----------+ +----------+
-|Classifier| |Retriever | |  Router  |
-+----------+ +----------+ +----------+
-     |             |             |
-     V             V             V
- [ Gemini ]   [BigQuery KB] [BigQuery Rules]
-```
+![Support Ticket Router Architecture](assets/architecture.png)
+
 
 ## 🚀 Quick Start
 
