@@ -14,6 +14,12 @@ PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 API_KEY = os.environ.get("GOOGLE_GENAI_API_KEY")
 GCP_SA_KEY = os.environ.get("GCP_SA_KEY")
 
+print(f"DEBUG: Vercel Environment Check")
+print(f"DEBUG: PROJECT_ID exists: {bool(PROJECT_ID)}")
+print(f"DEBUG: API_KEY exists: {bool(API_KEY)}")
+print(f"DEBUG: GCP_SA_KEY exists: {bool(GCP_SA_KEY)}")
+
+
 # Initialize credentials if provided
 if GCP_SA_KEY:
     try:
