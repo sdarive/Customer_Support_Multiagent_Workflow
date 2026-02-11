@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from agents.classifier_agent import TicketClassifierAgent
 from agents.knowledge_retriever_agent import KnowledgeRetrieverAgent
 from agents.router_agent import RouterAgent
@@ -40,7 +40,7 @@ class TicketCoordinator:
         
         result = {
             "ticket_id": ticket_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "ticket_description": ticket_description,
             "classification": classification,
             "suggested_solutions": solutions,

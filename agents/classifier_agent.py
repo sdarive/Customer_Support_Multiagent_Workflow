@@ -3,7 +3,7 @@ import sys
 import json
 import uuid
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import google.generativeai as genai
 from google.cloud import bigquery
 
@@ -92,7 +92,7 @@ class TicketClassifierAgent:
                 "token_count": token_count,
                 "cost_usd": cost_usd,
                 "agent_version": self.agent_version,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         ]
         errors = self.bq_client.insert_rows_json(table_id, rows_to_insert)
