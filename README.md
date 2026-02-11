@@ -14,6 +14,11 @@ The system uses a collaborative multi-agent architecture to process incoming sup
 
 ![Support Ticket Router Architecture](assets/architecture.png)
 
+### Tech Stack & Capabilities
+
+![Tech Stack & Capabilities Map](assets/tech_stack.png)
+
+
 
 ## 🚀 Quick Start
 
