@@ -193,11 +193,17 @@ async def read_root():
                     });
                     
                     const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.detail || "Server Error: check logs");
+                    }
+
                     const latency = Date.now() - start;
 
                     // Populate UI
                     document.getElementById('latencyTag').textContent = `${latency} ms`;
                     document.getElementById('resCategory').textContent = data.classification.category;
+
                     document.getElementById('resPriority').textContent = data.classification.priority;
                     
                     // Color code priority
@@ -238,7 +244,7 @@ async def read_root():
 
                 } catch (err) {
                     console.error(err);
-                    alert("Error processing ticket. Check console for details.");
+                    alert(`${err.message}`);
                 } finally {
                     btn.disabled = false;
                     loadingIcon.classList.add('hidden');
