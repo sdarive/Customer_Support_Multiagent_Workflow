@@ -14,11 +14,6 @@ The system uses a collaborative multi-agent architecture to process incoming sup
 
 ![Support Ticket Router Architecture](assets/architecture.png)
 
-### Tech Stack & Capabilities
-
-![Tech Stack & Capabilities Map](assets/tech_stack.png)
-
-
 
 ## 🚀 Quick Start
 
@@ -63,6 +58,9 @@ Example Telemetry Schema:
 - `agent_version`: CI/CD version tracking
 
 ## 🤖 Featured Tech
+
+![Tech Stack & Capabilities Map](assets/tech_stack.png)
+
 - **Gemini 2.0 Flash**: High-speed, low-cost LLM for classification and ranking.
 - **BigQuery**: System of record for knowledge, rules, and telemetry.
 - **GitHub Actions**: Automated testing and multi-stage deployment.
