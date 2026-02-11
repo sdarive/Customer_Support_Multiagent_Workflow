@@ -1,0 +1,6 @@
+google-cloud-aiplatform>=1.38.0
+google-cloud-bigquery>=3.14.0
+google-generativeai
+pytest>=7.4.0
+pytest-cov>=4.1.0
+

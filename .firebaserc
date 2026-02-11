@@ -1,0 +1,31 @@
+{
+  "projects": {
+    "default": "cogscreen-793dd"
+  },
+  "targets": {
+    "credit-memo-generator": {
+      "hosting": {
+        "default": [
+          "credit-memo-generator"
+        ],
+        "staging": [
+          "staging-cogscreen"
+        ],
+        "admin": [
+          "faa-cogscreen-admin"
+        ]
+      }
+    },
+    "cogscreen-793dd": {
+      "hosting": {
+        "default": [
+          "cogscreen-793dd"
+        ],
+        "admin": [
+          "cogscreen-admin-793dd"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

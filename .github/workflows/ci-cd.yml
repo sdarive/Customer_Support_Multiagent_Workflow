@@ -1,0 +1,56 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-agents:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run tests
+      env:
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
+      run: |
+        export PYTHONPATH=$PYTHONPATH:.
+        pytest tests/ -v --cov=agents --cov-report=xml
+
+  deploy-staging:
+    needs: test-agents
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy to Staging
+      run: |
+        echo "Deploying to staging environment..."
+        echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
+        # In a real scenario, we would use gcloud or terraform here
+        echo "Staging deployment complete."
+
+  deploy-production:
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy to Production
+      run: |
+        echo "Deploying to production environment (after manual approval)..."
+        echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
+
+        echo "Production deployment complete."

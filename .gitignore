@@ -1,0 +1,26 @@
+# Credentials
+.env
+.env.local
+.env.production
+.env.*.local
+*.json.bak
+service-account.json
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
