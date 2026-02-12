@@ -39,6 +39,13 @@ def get_coordinator():
     
     if gcp_sa_key:
         try:
+            # Check for obvious truncation
+            gcp_sa_key = gcp_sa_key.strip()
+            if not gcp_sa_key.endswith("}"):
+                init_error = f"GCP_SA_KEY appears truncated (Length: {len(gcp_sa_key)}, Ends with: '{gcp_sa_key[-20:]}'). It must end with '}}'"
+                print(init_error)
+                raise HTTPException(status_code=500, detail=init_error)
+
             # Handle escaped newlines from Vercel env vars
             if "\\n" in gcp_sa_key:
                 gcp_sa_key = gcp_sa_key.replace("\\n", "\n")
