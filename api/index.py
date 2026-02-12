@@ -49,9 +49,13 @@ def get_coordinator():
             gcp_sa_key = re.sub(r'[\x00-\x09\x0b-\x1f\x7f-\x9f]', '', gcp_sa_key)
 
             # Create credentials object directly
-            service_account_info = json.loads(gcp_sa_key)
+            service_account_info = json.loads(gcp_sa_key, strict=False)
             from google.oauth2 import service_account
             credentials = service_account.Credentials.from_service_account_info(service_account_info)
+        except json.JSONDecodeError as e:
+            init_error = f"JSON Parse Error in GCP_SA_KEY: {e.msg} at line {e.lineno} col {e.colno}"
+            print(init_error)
+            raise HTTPException(status_code=500, detail=init_error)
         except Exception as e:
             init_error = f"Error initializing GCP credentials: {str(e)}"
             print(init_error)
