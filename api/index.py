@@ -16,6 +16,8 @@ GCP_SA_KEY = os.environ.get("GCP_SA_KEY")
  
 # ... (rest of imports)
  
+# Initialize credentials if provided
+service_account_creds = None
 if GCP_SA_KEY:
     try:
         # Handle escaped newlines from Vercel env vars
@@ -23,11 +25,12 @@ if GCP_SA_KEY:
             GCP_SA_KEY = GCP_SA_KEY.replace("\\n", "\n")
         
         # Verify it is valid JSON
-        json.loads(GCP_SA_KEY)
- 
-        with open("/tmp/gcp_key.json", "w") as f:
-            f.write(GCP_SA_KEY)
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/gcp_key.json"
+        service_account_info = json.loads(GCP_SA_KEY)
+
+        # Create credentials object directly
+        from google.oauth2 import service_account
+        service_account_creds = service_account.Credentials.from_service_account_info(service_account_info)
+
     except Exception as e:
         print(f"Error handling GCP_SA_KEY: {e}")
 
@@ -38,7 +41,7 @@ def get_coordinator():
     if coordinator is None:
         if not PROJECT_ID:
             raise HTTPException(status_code=500, detail="GCP_PROJECT_ID environment variable not set")
-        coordinator = TicketCoordinator(PROJECT_ID, api_key=API_KEY, credentials=credentials)
+        coordinator = TicketCoordinator(PROJECT_ID, api_key=API_KEY, credentials=service_account_creds)
     return coordinator
 
 # --- Data Models ---
