@@ -46,8 +46,33 @@ class TicketRequest(BaseModel):
     description: str
 
 # --- API Endpoints ---
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-@app.get("/", response_class=HTMLResponse)
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return JSONResponse(
+            status_code=404,
+            content={"detail": f"Route Not Found. Server received path: {request.url.path}"},
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+@app.post("/process-ticket") # Alias in case Vercel strips /api prefix
+@app.post("/api/process-ticket")
+async def process_ticket_endpoint(ticket: TicketRequest):
+    try:
+        agent = get_coordinator()
+        result = agent.process_ticket(ticket.description)
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Agent Error: {str(e)}")
+
 async def read_root():
     return """
     <!DOCTYPE html>
