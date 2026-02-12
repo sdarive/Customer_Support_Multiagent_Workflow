@@ -24,3 +24,4 @@ htmlcov/
 # IDEs
 .vscode/
 .idea/
+gcp_key.json
