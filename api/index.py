@@ -48,14 +48,17 @@ def get_coordinator():
             # Remove control characters but keep newlines
             gcp_sa_key = re.sub(r'[\x00-\x09\x0b-\x1f\x7f-\x9f]', '', gcp_sa_key)
 
-            # Fix unescaped newlines in private_key block if present
-            # This handles cases where the key was pasted with literal newlines inside the string
-            def fix_private_key(match):
-                return match.group(0).replace("\n", "\\n")
+            # Fix unescaped newlines specifically in the private_key field
+            # This handles both standard keys and keys with newlines pasted directly
+            def fix_private_key_field(match):
+                # match.group(2) is the value content
+                fixed_value = match.group(2).replace("\n", "\\n")
+                return f'{match.group(1)}{fixed_value}{match.group(3)}'
             
+            # Match "private_key": "VALUE" across newlines
             gcp_sa_key = re.sub(
-                r'-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----', 
-                fix_private_key, 
+                r'("private_key":\s*")(.*?)(")', 
+                fix_private_key_field, 
                 gcp_sa_key, 
                 flags=re.DOTALL
             )
@@ -65,18 +68,9 @@ def get_coordinator():
             from google.oauth2 import service_account
             credentials = service_account.Credentials.from_service_account_info(service_account_info)
         except json.JSONDecodeError as e:
-            # If standard JSON parsing fails, try a fallback for extremely malformed keys
-            # (e.g. if newlines were stripped entirely)
-            try:
-                 # Last resort: replace ALL newlines with escaped if the first attempt failed
-                gcp_sa_key_fallback = gcp_sa_key.replace("\n", "\\n")
-                service_account_info = json.loads(gcp_sa_key_fallback, strict=False)
-                from google.oauth2 import service_account
-                credentials = service_account.Credentials.from_service_account_info(service_account_info)
-            except Exception:
-                init_error = f"JSON Parse Error in GCP_SA_KEY: {e.msg} at line {e.lineno} col {e.colno}"
-                print(init_error)
-                raise HTTPException(status_code=500, detail=init_error)
+            init_error = f"JSON Parse Error in GCP_SA_KEY: {e.msg} at line {e.lineno} col {e.colno}"
+            print(init_error)
+            raise HTTPException(status_code=500, detail=init_error)
         except Exception as e:
             init_error = f"Error initializing GCP credentials: {str(e)}"
             print(init_error)
