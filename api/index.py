@@ -43,6 +43,11 @@ def get_coordinator():
             if "\\n" in gcp_sa_key:
                 gcp_sa_key = gcp_sa_key.replace("\\n", "\n")
             
+            # Clean possible invalid control characters
+            import re
+            # Remove control characters but keep newlines
+            gcp_sa_key = re.sub(r'[\x00-\x09\x0b-\x1f\x7f-\x9f]', '', gcp_sa_key)
+
             # Create credentials object directly
             service_account_info = json.loads(gcp_sa_key)
             from google.oauth2 import service_account
