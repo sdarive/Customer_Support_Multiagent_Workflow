@@ -5,14 +5,17 @@ import google.generativeai as genai
 from google.cloud import bigquery
 
 class KnowledgeRetrieverAgent:
-    def __init__(self, project_id, api_key=None):
+    def __init__(self, project_id, api_key=None, credentials=None):
         self.project_id = project_id
         if not api_key:
             api_key = os.environ.get("GOOGLE_GENAI_API_KEY")
         if api_key:
             genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel("gemini-2.0-flash")
-        self.bq_client = bigquery.Client(project=project_id)
+        if credentials:
+            self.bq_client = bigquery.Client(project=project_id, credentials=credentials)
+        else:
+            self.bq_client = bigquery.Client(project=project_id)
         self.dataset_id = "support_tickets_staging"
 
     def retrieve_solutions(self, ticket_description: str, category: str, top_k: int = 3) -> list:

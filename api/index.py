@@ -38,7 +38,7 @@ def get_coordinator():
     if coordinator is None:
         if not PROJECT_ID:
             raise HTTPException(status_code=500, detail="GCP_PROJECT_ID environment variable not set")
-        coordinator = TicketCoordinator(PROJECT_ID, api_key=API_KEY)
+        coordinator = TicketCoordinator(PROJECT_ID, api_key=API_KEY, credentials=credentials)
     return coordinator
 
 # --- Data Models ---

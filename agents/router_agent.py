@@ -4,9 +4,12 @@ import json
 from google.cloud import bigquery
 
 class RouterAgent:
-    def __init__(self, project_id):
+    def __init__(self, project_id, credentials=None):
         self.project_id = project_id
-        self.bq_client = bigquery.Client(project=project_id)
+        if credentials:
+            self.bq_client = bigquery.Client(project=project_id, credentials=credentials)
+        else:
+            self.bq_client = bigquery.Client(project=project_id)
         self.dataset_id = "support_tickets_staging"
 
     def route_ticket(self, category: str, priority: str) -> dict:

@@ -8,7 +8,7 @@ import google.generativeai as genai
 from google.cloud import bigquery
 
 class TicketClassifierAgent:
-    def __init__(self, project_id, api_key=None):
+    def __init__(self, project_id, api_key=None, credentials=None):
         self.project_id = project_id
         if not api_key:
             # Try to get from environment or handle appropriately
@@ -19,7 +19,10 @@ class TicketClassifierAgent:
         
         self.model = genai.GenerativeModel("gemini-2.0-flash")
 
-        self.bq_client = bigquery.Client(project=project_id)
+        if credentials:
+            self.bq_client = bigquery.Client(project=project_id, credentials=credentials)
+        else:
+            self.bq_client = bigquery.Client(project=project_id)
         self.dataset_id = "support_tickets_staging"
         self.agent_version = "v1.0.0"
 

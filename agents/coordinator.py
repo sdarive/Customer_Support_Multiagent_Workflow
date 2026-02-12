@@ -8,12 +8,12 @@ from agents.knowledge_retriever_agent import KnowledgeRetrieverAgent
 from agents.router_agent import RouterAgent
 
 class TicketCoordinator:
-    def __init__(self, project_id, api_key=None):
+    def __init__(self, project_id, api_key=None, credentials=None):
         self.project_id = project_id
         self.api_key = api_key
-        self.classifier = TicketClassifierAgent(project_id, api_key=api_key)
-        self.retriever = KnowledgeRetrieverAgent(project_id, api_key=api_key)
-        self.router = RouterAgent(project_id)
+        self.classifier = TicketClassifierAgent(project_id, api_key=api_key, credentials=credentials)
+        self.retriever = KnowledgeRetrieverAgent(project_id, api_key=api_key, credentials=credentials)
+        self.router = RouterAgent(project_id, credentials=credentials)
 
     def process_ticket(self, ticket_description: str, ticket_id: str = None) -> dict:
         """
