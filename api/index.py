@@ -201,7 +201,8 @@ async def read_root():
                     const data = await response.json();
                     
                     if (!response.ok) {
-                        throw new Error(data.detail || "Server Error: check logs");
+                        const errorMsg = data.detail || (response.status === 404 ? "API Route Not Found (404)" : "Server Error");
+                        throw new Error(errorMsg);
                     }
 
                     const latency = Date.now() - start;
