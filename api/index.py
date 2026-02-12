@@ -13,18 +13,18 @@ app = FastAPI()
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 API_KEY = os.environ.get("GOOGLE_GENAI_API_KEY")
 GCP_SA_KEY = os.environ.get("GCP_SA_KEY")
-
-print(f"DEBUG: Vercel Environment Check")
-print(f"DEBUG: PROJECT_ID exists: {bool(PROJECT_ID)}")
-print(f"DEBUG: API_KEY exists: {bool(API_KEY)}")
-print(f"DEBUG: GCP_SA_KEY exists: {bool(GCP_SA_KEY)}")
-
-
-# Initialize credentials if provided
+ 
+# ... (rest of imports)
+ 
 if GCP_SA_KEY:
     try:
-        # Create a temporary file for the credentials so libraries can find it
-        # This is a common pattern for serverless environments
+        # Handle escaped newlines from Vercel env vars
+        if "\\n" in GCP_SA_KEY:
+            GCP_SA_KEY = GCP_SA_KEY.replace("\\n", "\n")
+        
+        # Verify it is valid JSON
+        json.loads(GCP_SA_KEY)
+ 
         with open("/tmp/gcp_key.json", "w") as f:
             f.write(GCP_SA_KEY)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/gcp_key.json"
