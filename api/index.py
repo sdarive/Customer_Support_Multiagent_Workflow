@@ -73,6 +73,7 @@ async def process_ticket_endpoint(ticket: TicketRequest):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Internal Agent Error: {str(e)}")
 
+@app.get("/", response_class=HTMLResponse)
 async def read_root():
     return """
     <!DOCTYPE html>
