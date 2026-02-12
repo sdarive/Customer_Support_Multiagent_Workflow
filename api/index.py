@@ -10,38 +10,42 @@ from agents.coordinator import TicketCoordinator
 app = FastAPI()
 
 # --- Configuration & Credentials ---
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
-API_KEY = os.environ.get("GOOGLE_GENAI_API_KEY")
-GCP_SA_KEY = os.environ.get("GCP_SA_KEY")
- 
-# ... (rest of imports)
- 
-# Initialize credentials if provided
-service_account_creds = None
-if GCP_SA_KEY:
-    try:
-        # Handle escaped newlines from Vercel env vars
-        if "\\n" in GCP_SA_KEY:
-            GCP_SA_KEY = GCP_SA_KEY.replace("\\n", "\n")
-        
-        # Verify it is valid JSON
-        service_account_info = json.loads(GCP_SA_KEY)
-
-        # Create credentials object directly
-        from google.oauth2 import service_account
-        service_account_creds = service_account.Credentials.from_service_account_info(service_account_info)
-
-    except Exception as e:
-        print(f"Error handling GCP_SA_KEY: {e}")
-
 # Lazy initialization of the coordinator
 coordinator = None
+
 def get_coordinator():
     global coordinator
     if coordinator is None:
-        if not PROJECT_ID:
+        project_id = os.environ.get("GCP_PROJECT_ID")
+        api_key = os.environ.get("GOOGLE_GENAI_API_KEY")
+        
+        if not project_id:
             raise HTTPException(status_code=500, detail="GCP_PROJECT_ID environment variable not set")
-        coordinator = TicketCoordinator(PROJECT_ID, api_key=API_KEY, credentials=service_account_creds)
+            
+        # Parse Credentials
+        gcp_sa_key = os.environ.get("GCP_SA_KEY")
+        credentials = None
+        
+        if gcp_sa_key:
+            try:
+                # Handle escaped newlines from Vercel env vars
+                if "\\n" in gcp_sa_key:
+                    gcp_sa_key = gcp_sa_key.replace("\\n", "\n")
+                
+                # Create credentials object directly
+                service_account_info = json.loads(gcp_sa_key)
+                from google.oauth2 import service_account
+                credentials = service_account.Credentials.from_service_account_info(service_account_info)
+            except Exception as e:
+                print(f"Error initializing GCP credentials: {e}")
+                # We continue without credentials, hoping for ADC fallback or just to show the error later
+        else:
+             print("WARNING: GCP_SA_KEY environment variable not found.")
+
+        # If we still don't have credentials and we are in Vercel (no local ADC file), this will fail inside agents
+        # But we pass what we have.
+        coordinator = TicketCoordinator(project_id, api_key=api_key, credentials=credentials)
+        
     return coordinator
 
 # --- Data Models ---
