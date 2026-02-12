@@ -11,40 +11,57 @@ app = FastAPI()
 
 # --- Configuration & Credentials ---
 # Lazy initialization of the coordinator
+# Lazy initialization of the coordinator
 coordinator = None
+init_error = None
 
 def get_coordinator():
-    global coordinator
-    if coordinator is None:
-        project_id = os.environ.get("GCP_PROJECT_ID")
-        api_key = os.environ.get("GOOGLE_GENAI_API_KEY")
-        
-        if not project_id:
-            raise HTTPException(status_code=500, detail="GCP_PROJECT_ID environment variable not set")
-            
-        # Parse Credentials
-        gcp_sa_key = os.environ.get("GCP_SA_KEY")
-        credentials = None
-        
-        if gcp_sa_key:
-            try:
-                # Handle escaped newlines from Vercel env vars
-                if "\\n" in gcp_sa_key:
-                    gcp_sa_key = gcp_sa_key.replace("\\n", "\n")
-                
-                # Create credentials object directly
-                service_account_info = json.loads(gcp_sa_key)
-                from google.oauth2 import service_account
-                credentials = service_account.Credentials.from_service_account_info(service_account_info)
-            except Exception as e:
-                print(f"Error initializing GCP credentials: {e}")
-                # We continue without credentials, hoping for ADC fallback or just to show the error later
-        else:
-             print("WARNING: GCP_SA_KEY environment variable not found.")
+    global coordinator, init_error
+    
+    # Return existing coordinator if ready
+    if coordinator:
+        return coordinator
 
-        # If we still don't have credentials and we are in Vercel (no local ADC file), this will fail inside agents
-        # But we pass what we have.
+    # Check for previous permanent failure
+    if init_error:
+        raise HTTPException(status_code=500, detail=f"Service Initialization Failed: {init_error}")
+
+    project_id = os.environ.get("GCP_PROJECT_ID")
+    api_key = os.environ.get("GOOGLE_GENAI_API_KEY")
+    
+    if not project_id:
+        init_error = "GCP_PROJECT_ID environment variable not set"
+        raise HTTPException(status_code=500, detail=init_error)
+        
+    # Parse Credentials
+    gcp_sa_key = os.environ.get("GCP_SA_KEY")
+    credentials = None
+    
+    if gcp_sa_key:
+        try:
+            # Handle escaped newlines from Vercel env vars
+            if "\\n" in gcp_sa_key:
+                gcp_sa_key = gcp_sa_key.replace("\\n", "\n")
+            
+            # Create credentials object directly
+            service_account_info = json.loads(gcp_sa_key)
+            from google.oauth2 import service_account
+            credentials = service_account.Credentials.from_service_account_info(service_account_info)
+        except Exception as e:
+            init_error = f"Error initializing GCP credentials: {str(e)}"
+            print(init_error)
+            raise HTTPException(status_code=500, detail=init_error)
+    else:
+         init_error = "GCP_SA_KEY environment variable not found."
+         print(init_error)
+         raise HTTPException(status_code=500, detail=init_error)
+
+    # If we reach here, we have credentials
+    try:
         coordinator = TicketCoordinator(project_id, api_key=api_key, credentials=credentials)
+    except Exception as e:
+        init_error = f"Failed to initialize TicketCoordinator: {str(e)}"
+        raise HTTPException(status_code=500, detail=init_error)
         
     return coordinator
 
